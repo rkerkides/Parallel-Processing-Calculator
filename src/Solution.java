@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
+/**
+ * Implements a command runner and task completion listener for managing and executing long-running tasks asynchronously.
+ * This class provides functionalities to start, cancel, and monitor the status of tasks using an ExecutorService.
+ */
 public class Solution implements CommandRunner, TaskCompletionListener{
     private final ExecutorService executorService;
     private final ConcurrentHashMap<Long, Future<?>> taskMap = new ConcurrentHashMap<>();
@@ -11,12 +15,20 @@ public class Solution implements CommandRunner, TaskCompletionListener{
     private final ConcurrentHashMap<Long, List<Long>> taskDependencies = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, Boolean> cancelMap = new ConcurrentHashMap<>();
 
+    /**
+     * Constructs a Solution instance initializing the executor service to manage asynchronous tasks.
+     */
     public Solution() {
        this.executorService = Executors.newCachedThreadPool();
     }
 
-    // The runCommand method of this class will be passed a string, corresponding to a command the user entered.
-    // It should perform the relevant command, and return the specified output string.
+    /**
+     * Interprets and executes a given command string, performing operations such as starting,
+     * canceling tasks, and querying their state.
+     *
+     * @param command The command to be executed.
+     * @return A string message indicating the result of the command execution.
+     */
     @Override
     public String runCommand(String command) {
         String[] parts = command.split(" "); // Split the command into parts
@@ -58,6 +70,12 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         return "Invalid command";
     }
 
+    /**
+     * Called when a task is completed. Removes the task from tracking maps and triggers any dependent tasks.
+     *
+     * @param N The identifier of the completed task.
+     * @param result The result of the completed task.
+     */
     @Override
     public void onTaskCompleted(long N, int result) {
         taskMap.remove(N);
@@ -72,12 +90,24 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         taskDependencies.remove(N);
     }
 
-
+    /**
+     * Called when a task is cancelled. Can be used to perform clean-up or trigger other actions.
+     * In this case, it simply removes the task from tracking maps.
+     *
+     * @param N The identifier of the cancelled task.
+     */
     @Override
     public void onTaskCancelled(long N) {
-
+        taskMap.remove(N);
+        cancelMap.put(N, true);
     }
 
+    /**
+     * Starts a task with the specified identifier if it's not already running.
+     *
+     * @param N The identifier for the task to start.
+     * @return A string message indicating the start status of the task.
+     */
     private String startN(long N) {
         // Check if the task is already running
         if (taskMap.containsKey(N)) {
@@ -91,6 +121,12 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         return "started " + N;
     }
 
+    /**
+     * Attempts to cancel a task with the specified identifier.
+     *
+     * @param N The identifier of the task to cancel.
+     * @return A string message indicating whether the task was successfully cancelled.
+     */
     private String cancelN(long N) {
         Future<?> future = taskMap.get(N);
         if (future != null) {
@@ -102,12 +138,11 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         return "Cancel failed: " + N + " not found";
     }
 
-    // return a message indicating the total number
-    //of calculations currently running (i.e. excluding those already completed/cancelled), and
-    //their inputs N (in any order), in the form
-    //“3 calculations running: 83476 1000 176544”.
-    //If no calculations are running, return the string “no
-    //calculations running”
+    /**
+     * Provides the current status of running tasks, including their identifiers.
+     *
+     * @return A string message listing running tasks or indicating that no tasks are running.
+     */
     private String running() {
         if (taskMap.isEmpty()) {
             return "no calculations running";
@@ -120,11 +155,12 @@ public class Solution implements CommandRunner, TaskCompletionListener{
 
 
 
-    // if the calculation for N is finished, return message
-    //“result is M ” where M is the integer result; if
-    //the calculation is not yet finished, return message
-    //“calculating”. If the calculation was started but
-    //already cancelled, return message “cancelled”
+    /**
+     * Retrieves the result of a task with the specified identifier, if available.
+     *
+     * @param N The identifier of the task.
+     * @return A string message indicating the task's result, its calculation status, or a cancellation notice.
+     */
     private String getN(long N) {
         if (resultMap.containsKey(N)) {
             return "result is " + resultMap.get(N);
@@ -138,10 +174,13 @@ public class Solution implements CommandRunner, TaskCompletionListener{
 
 
 
-    // schedule the calculation for M to start when that for
-    //N finishes (or is cancelled). Return the message “M
-    //will start after N ” immediately (without waiting for either calculation). The calculation for M
-    //should not appear in running until it is actually running (i.e. N has completed)
+    /**
+     * Schedules a task to start after the completion or cancellation of another task.
+     *
+     * @param N The identifier of the prerequisite task.
+     * @param M The identifier of the task to start afterward.
+     * @return A string message indicating the scheduling status.
+     */
     private String afterNM(long N, long M) {
         taskDependencies.computeIfAbsent(N, k -> new ArrayList<>()).add(M);
         return M + " will start after " + N;
@@ -149,9 +188,11 @@ public class Solution implements CommandRunner, TaskCompletionListener{
 
 
 
-    // wait for all calculations previously requested by the
-    //user (including those scheduled with after) to finish, and then after they are all completed, return
-    //message “finished”
+    /**
+     * Waits for all tasks, including those scheduled with dependencies, to complete before returning.
+     *
+     * @return A string message indicating that all tasks have finished.
+     */
     private String finish() {
         // First, wait for all currently running tasks to complete
         for (Future<?> future : taskMap.values()) {
@@ -196,8 +237,11 @@ public class Solution implements CommandRunner, TaskCompletionListener{
 
 
 
-    // immediately stop all running calculations (and discard any scheduled using after), and then when
-    //they are stopped (which should be within 0.1s) return message “aborted”
+    /**
+     * Stops all running tasks and clears any scheduled tasks, effectively aborting all operations.
+     *
+     * @return A string message indicating that all tasks have been aborted.
+     */
     private String abort() {
         for (Future<?> future : taskMap.values()) {
             future.cancel(true); // Attempt to cancel each running task
