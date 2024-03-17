@@ -14,6 +14,11 @@ public class SlowCalculator implements Runnable, Callable<Integer> {
     public void run() {
         try {
             final int result = call(); // Perform the calculation
+            try {
+                Thread.sleep(1000); // Simulate a task taking time to complete
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // Handle interruption correctly
+            }
             // Notify listener of completion
             if (listener != null) {
                 listener.onTaskCompleted(N, result);
