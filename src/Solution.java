@@ -1,3 +1,5 @@
+package org.example;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +21,7 @@ public class Solution implements CommandRunner, TaskCompletionListener{
      * Constructs a Solution instance initializing the executor service to manage asynchronous tasks.
      */
     public Solution() {
-       this.executorService = Executors.newCachedThreadPool();
+        this.executorService = Executors.newCachedThreadPool();
     }
 
     /**
@@ -133,9 +135,8 @@ public class Solution implements CommandRunner, TaskCompletionListener{
             future.cancel(true); // Attempts to interrupt the task
             taskMap.remove(N);
             cancelMap.put(N, true);
-            return "cancelled " + N;
         }
-        return "Cancel failed: " + N + " not found";
+        return "cancelled " + N;
     }
 
     /**
