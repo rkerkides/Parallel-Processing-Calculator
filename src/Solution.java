@@ -103,24 +103,7 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         resultMap.put(N, (long) result);
 
         // Start any tasks dependent on N
-        List<Long> dependents = taskDependencies.getOrDefault(N, new ArrayList<>());
-        for (Long dependent : dependents) {
-            startN(dependent);
-        }
-        // Optionally, remove N from the dependency map
-        taskDependencies.remove(N);
-    }
-
-    /**
-     * Called when a task is cancelled. Can be used to perform clean-up or trigger other actions.
-     * In this case, it simply removes the task from tracking maps.
-     *
-     * @param N The identifier of the cancelled task.
-     */
-    @Override
-    public void onTaskCancelled(long N) {
-        taskMap.remove(N);
-        cancelMap.put(N, true);
+        triggerDependentTasks(N);
     }
 
     /**
@@ -143,20 +126,30 @@ public class Solution implements CommandRunner, TaskCompletionListener{
     }
 
     /**
-     * Attempts to cancel a task with the specified identifier.
+     * Attempts to cancel a task with the specified identifier. This method directly attempts
+     * to interrupt the task if it's running, updates the task tracking to reflect the cancellation,
+     * and triggers any dependent tasks to start, as the cancellation of a task should not
+     * prevent its dependents from executing.
      *
      * @param N The identifier of the task to cancel.
      * @return A string message indicating whether the task was successfully cancelled.
      */
     private String cancelN(long N) {
         Future<?> future = taskMap.get(N);
+        boolean cancelled = false;
         if (future != null) {
-            future.cancel(true); // Attempts to interrupt the task
-            taskMap.remove(N);
-            cancelMap.put(N, true);
+            cancelled = future.cancel(true); // Attempts to interrupt the task
+            if (cancelled) {
+                // Perform the cancellation actions only if the task was successfully cancelled
+                taskMap.remove(N);
+                cancelMap.put(N, true);
+                // Directly handle dependent tasks here to ensure they are triggered upon cancellation
+                triggerDependentTasks(N);
+            }
         }
-        return "cancelled " + N;
+        return cancelled ? "cancelled " + N : "Failed to cancel " + N;
     }
+
 
     /**
      * Provides the current status of running tasks, including their identifiers.
@@ -261,5 +254,21 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         taskMap.clear(); // Clear all tasks
         taskDependencies.clear(); // Clear scheduled tasks
         return "aborted";
+    }
+
+    /**
+     * Triggers any tasks that are dependent on a given task, identified by N. This method
+     * is used after a task completes or is cancelled to ensure that dependent tasks are
+     * started as intended.
+     *
+     * @param N The identifier of the task that has completed or been cancelled.
+     */
+    private void triggerDependentTasks(long N) {
+        List<Long> dependents = taskDependencies.remove(N);
+        if (dependents != null) {
+            for (Long dependent : dependents) {
+                startN(dependent);
+            }
+        }
     }
 }

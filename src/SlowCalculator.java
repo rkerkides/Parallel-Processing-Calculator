@@ -18,12 +18,7 @@ public class SlowCalculator implements Runnable, Callable<Integer> {
             if (listener != null) {
                 listener.onTaskCompleted(N, result);
             }
-        } catch (Exception e) {
-            // Handle the case where the task was interrupted
-            if (e instanceof InterruptedException) {
-                // Notify listener of cancellation if necessary
-                listener.onTaskCancelled(N);
-            }
+        } catch (Exception ignored) {
         }
     }
 
