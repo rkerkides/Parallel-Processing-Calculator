@@ -34,40 +34,61 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         String[] parts = command.split(" "); // Split the command into parts
         String cmd = parts[0]; // The actual command, e.g., "start"
 
-        switch (cmd) {
-            case "start":
-                if (parts.length > 1) {
-                    long N = Long.parseLong(parts[1]);
-                    return startN(N);
-                }
-                break;
-            case "cancel":
-                if (parts.length > 1) {
-                    long N = Long.parseLong(parts[1]);
-                    return cancelN(N);
-                }
-                break;
-            case "running":
-                return running();
-            case "get":
-                if (parts.length > 1) {
-                    long N = Long.parseLong(parts[1]);
-                    return getN(N);
-                }
-                break;
-            case "after":
-                if (parts.length > 2) {
-                    long N = Long.parseLong(parts[1]);
-                    long M = Long.parseLong(parts[2]);
-                    return afterNM(N, M);
-                }
-                break;
-            case "finish":
-                return finish();
-            case "abort":
-                return abort();
+        try {
+            switch (cmd) {
+                case "start":
+                    if (parts.length == 2) {
+                        long N = Long.parseLong(parts[1]);
+                        return startN(N);
+                    } else {
+                        return "Invalid command";
+                    }
+                case "cancel":
+                    if (parts.length == 2) {
+                        long N = Long.parseLong(parts[1]);
+                        return cancelN(N);
+                    } else {
+                        return "Invalid command";
+                    }
+                case "running":
+                    if (parts.length == 1) {
+                        return running();
+                    } else {
+                        return "Invalid command";
+                    }
+                case "get":
+                    if (parts.length == 2) {
+                        long N = Long.parseLong(parts[1]);
+                        return getN(N);
+                    } else {
+                        return "Invalid command";
+                    }
+                case "after":
+                    if (parts.length == 3) {
+                        long N = Long.parseLong(parts[1]);
+                        long M = Long.parseLong(parts[2]);
+                        return afterNM(N, M);
+                    } else {
+                        return "Invalid command";
+                    }
+                case "finish":
+                    if (parts.length == 1) {
+                        return finish();
+                    } else {
+                        return "Invalid command";
+                    }
+                case "abort":
+                    if (parts.length == 1) {
+                        return abort();
+                    } else {
+                        return "Invalid command";
+                    }
+                default:
+                    return "Invalid command";
+            }
+        } catch (NumberFormatException e) {
+            return "Invalid command"; // Catch parsing errors
         }
-        return "Invalid command";
     }
 
     /**
