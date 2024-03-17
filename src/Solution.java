@@ -135,10 +135,9 @@ public class Solution implements CommandRunner, TaskCompletionListener{
      * @return A string message indicating whether the task was successfully cancelled.
      */
     private String cancelN(long N) {
-        Future<?> future = taskMap.get(N);
-        boolean cancelled = false;
+        Future<?> future = taskMap.get(N);;
         if (future != null) {
-            cancelled = future.cancel(true); // Attempts to interrupt the task
+            boolean cancelled = future.cancel(true); // Attempts to interrupt the task
             if (cancelled) {
                 // Perform the cancellation actions only if the task was successfully cancelled
                 taskMap.remove(N);
@@ -147,7 +146,7 @@ public class Solution implements CommandRunner, TaskCompletionListener{
                 triggerDependentTasks(N);
             }
         }
-        return cancelled ? "cancelled " + N : "Failed to cancel " + N;
+        return "cancelled " + N;
     }
 
 
@@ -173,14 +172,16 @@ public class Solution implements CommandRunner, TaskCompletionListener{
      * @return A string message indicating the task's result, its calculation status, or a cancellation notice.
      */
     private String getN(long N) {
-        if (resultMap.containsKey(N)) {
+        if (cancelMap.containsKey(N)) {
+            return "cancelled";
+        } else if (resultMap.containsKey(N)) {
             return "result is " + resultMap.get(N);
         } else if (taskMap.containsKey(N)) {
             return "calculating";
-        } else if (cancelMap.containsKey(N)) {
-            return "cancelled";
+        } else {
+            // If the task has never been started, it's not found (this scenario is not covered in the specification)
+            return "task " + N + " has not been started yet";
         }
-        return "Can't get " + N + ", not found";
     }
 
     /**
