@@ -1,5 +1,3 @@
-package org.example;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -154,8 +152,6 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         return taskMap.size() + " calculations running: " + runningTasks;
     }
 
-
-
     /**
      * Retrieves the result of a task with the specified identifier, if available.
      *
@@ -173,8 +169,6 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         return "Can't get " + N + ", not found";
     }
 
-
-
     /**
      * Schedules a task to start after the completion or cancellation of another task.
      *
@@ -186,8 +180,6 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         taskDependencies.computeIfAbsent(N, k -> new ArrayList<>()).add(M);
         return M + " will start after " + N;
     }
-
-
 
     /**
      * Waits for all tasks, including those scheduled with dependencies, to complete before returning.
@@ -236,8 +228,6 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         return "finished";
     }
 
-
-
     /**
      * Stops all running tasks and clears any scheduled tasks, effectively aborting all operations.
      *
@@ -251,8 +241,4 @@ public class Solution implements CommandRunner, TaskCompletionListener{
         taskDependencies.clear(); // Clear scheduled tasks
         return "aborted";
     }
-
-
-
-
 }
