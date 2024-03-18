@@ -15,6 +15,7 @@ public class Main {
         System.out.println(commandRunner.runCommand("running"));
         System.out.println(commandRunner.runCommand("get 30"));
         System.out.println(commandRunner.runCommand("get 72345680"));
+        System.out.println(commandRunner.runCommand("get 10456060"));
         System.out.println(commandRunner.runCommand("after 10456060 5032390"));
         System.out.println(commandRunner.runCommand("running"));
 

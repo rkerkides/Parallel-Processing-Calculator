@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
  * Implements a command runner and task completion listener for managing and executing long-running tasks asynchronously.
  * This class provides functionalities to start, cancel, and monitor the status of tasks using an ExecutorService.
  */
-public class Solution implements CommandRunner, TaskCompletionListener{
+public class Solution implements CommandRunner {
     private final ExecutorService executorService;
     private final ConcurrentHashMap<Long, Future<?>> taskMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, Long> resultMap = new ConcurrentHashMap<>();
@@ -97,7 +97,6 @@ public class Solution implements CommandRunner, TaskCompletionListener{
      * @param N The identifier of the completed task.
      * @param result The result of the completed task.
      */
-    @Override
     public void onTaskCompleted(long N, int result) {
         taskMap.remove(N);
         resultMap.put(N, (long) result);

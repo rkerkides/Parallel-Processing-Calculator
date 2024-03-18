@@ -3,9 +3,9 @@ import java.util.concurrent.Callable;
 public class SlowCalculator implements Runnable, Callable<Integer> {
 
     private final long N;
-    private final TaskCompletionListener listener;
+    private final Solution listener;
 
-    public SlowCalculator(final long N, final TaskCompletionListener listener) {
+    public SlowCalculator(final long N, final Solution listener) {
         this.N = N;
         this.listener = listener;
     }
