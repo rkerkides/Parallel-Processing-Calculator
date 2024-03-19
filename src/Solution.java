@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -248,13 +249,21 @@ public class Solution implements CommandRunner {
      * @return A string message indicating that all tasks have been aborted.
      */
     private String abort() {
-        for (Future<?> future : taskMap.values()) {
-            future.cancel(true); // Attempt to cancel each running task
+        // Iterate over the entry set of the taskMap to access both keys (task IDs) and values (Future<?> objects)
+        for (Map.Entry<Long, Future<?>> entry : taskMap.entrySet()) {
+            Long taskId = entry.getKey(); // Get the task ID
+            Future<?> future = entry.getValue(); // Get the Future<?> object
+            boolean cancelled = future.cancel(true); // Attempt to interrupt the task
+            if (cancelled) {
+                // If the task was successfully cancelled, add it to the cancelMap
+                cancelMap.put(taskId, true);
+            }
         }
-        taskMap.clear(); // Clear all tasks
+        taskMap.clear(); // Clear all tasks after attempting to cancel them
         taskDependencies.clear(); // Clear scheduled tasks
         return "aborted";
     }
+
 
     /**
      * Triggers any tasks that are dependent on a given task, identified by N. This method
