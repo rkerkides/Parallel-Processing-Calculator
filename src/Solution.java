@@ -208,7 +208,6 @@ public class Solution implements CommandRunner {
                 future.get(); // Wait for each task to complete
             } catch (InterruptedException | ExecutionException e) {
                 Thread.currentThread().interrupt(); // Restore the interrupted status
-                // Optionally log the exception or handle it as needed
             }
         }
 
@@ -235,7 +234,6 @@ public class Solution implements CommandRunner {
                     future.get();
                 } catch (InterruptedException | ExecutionException e) {
                     Thread.currentThread().interrupt(); // Restore the interrupted status
-                    // Optionally log the exception or handle it as needed
                 }
             }
         } while (newTasksStarted);
@@ -251,8 +249,8 @@ public class Solution implements CommandRunner {
     private String abort() {
         // Iterate over the entry set of the taskMap to access both keys (task IDs) and values (Future<?> objects)
         for (Map.Entry<Long, Future<?>> entry : taskMap.entrySet()) {
-            Long taskId = entry.getKey(); // Get the task ID
-            Future<?> future = entry.getValue(); // Get the Future<?> object
+            Long taskId = entry.getKey();
+            Future<?> future = entry.getValue();
             boolean cancelled = future.cancel(true); // Attempt to interrupt the task
             if (cancelled) {
                 // If the task was successfully cancelled, add it to the cancelMap
